@@ -1,0 +1,4 @@
+const createNFTContract = "0xcC70DF57Ee4449FecE1511929D537b1A4a4b2d66";
+const createCubeContract= "0x5e9fdD0ABC2Aa1615b619c51E5fEd68E331AbD77";
+const auctionsContract= "0x48B5d50b2F16D4a7E27aA8a5ba1C1D9631C12678";
+const wethContract= "0x15155000Cc66BBd665dC028A58c6B934262e1a85";
