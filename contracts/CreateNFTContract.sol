@@ -19,7 +19,8 @@ contract CreateNFTContract is ERC1155, Ownable, ERC1155Supply{
     function newBatch(
         uint256[] memory ids,
         uint256[] memory amounts,
-        bytes memory data) external {
+        bytes memory data) external 
+    {
             if(ids.length == 1){
                 mint(msg.sender, ids[0], amounts[0], data);
             }

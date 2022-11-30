@@ -592,8 +592,8 @@
       ]
     },
     "C:\\Users\\Ameer Hamza\\Downloads\\ContractCreationOfRobotdrop\\MarketPlace\\contracts\\CreateNFTContract.sol": {
-      "lastModificationDate": 1669817954041,
-      "contentHash": "f30aba622f64279ebfa0c69020178c97",
+      "lastModificationDate": 1669825758859,
+      "contentHash": "6b36e6ef7b4b750c223e23d245bc3cc0",
       "sourceName": "contracts/CreateNFTContract.sol",
       "solcConfig": {
         "version": "0.8.17",
@@ -858,8 +858,8 @@
       ]
     },
     "C:\\Users\\Ameer Hamza\\Downloads\\ContractCreationOfRobotdrop\\MarketPlace\\contracts\\CreateCubeContract.sol": {
-      "lastModificationDate": 1669821418934,
-      "contentHash": "d7b0da7bba46ed3d00ef2eaae5141ecb",
+      "lastModificationDate": 1669828204007,
+      "contentHash": "fed194e3d6129a59ef90102f50fadbf6",
       "sourceName": "contracts/CreateCubeContract.sol",
       "solcConfig": {
         "version": "0.8.17",
@@ -896,7 +896,7 @@
         ">= 0.7.0 < 0.9.0"
       ],
       "artifacts": [
-        "createCubeContrat"
+        "createCubeContract"
       ]
     },
     "C:\\Users\\Ameer Hamza\\Downloads\\ContractCreationOfRobotdrop\\MarketPlace\\node_modules\\@openzeppelin\\contracts\\utils\\Counters.sol": {
