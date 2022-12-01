@@ -2,5 +2,15 @@
 require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-ethers");
 module.exports = {
-  solidity: "0.8.17",
+ solidity: {
+  compilers: [
+    {
+      version: "0.8.17",
+    },
+    {
+      version: "0.4.26",
+      settings: {},
+    },
+  ],
+ },
 };

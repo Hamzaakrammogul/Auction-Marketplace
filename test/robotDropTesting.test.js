@@ -1,167 +1,200 @@
 const { expect } = require("chai"); 
 
-const toWei = (num) => ethers.utils.parseEther(num.toString())
-const fromWei = (num) => ethers.utils.formatEther(num)
+const toWei = (num) => ethers.utils.parseEther(num.toString());
+const fromWei = (num) => ethers.utils.formatEther(num);
 
-describe("NFTMarketplace", function () {
+let CreateCubeContract;
+let cube;
+let WethContract;
+let weth9;
+let createAuctionContract;
+let auction;
+let addr1, addr2, deployer, addrs;
 
-  let NFT;
-  let nft;
-  let Marketplace;
-  let marketplace
-  let deployer;
-  let addr1;
-  let addr2;
-  let addrs;
-  let feePercent = 1;
-  let URI = "sample URI"
-
-  beforeEach(async function () {
-    // Get the ContractFactories and Signers here.
-    NFT = await ethers.getContractFactory("createCubeContract");
-    Marketplace = await ethers.getContractFactory("Marketplace");
-    [deployer, addr1, addr2, ...addrs] = await ethers.getSigners();
-
-    // To deploy our contracts
-    nft = await NFT.deploy();
-    marketplace = await Marketplace.deploy(feePercent);
+describe("Create Cube Contract", function () {
+  beforeEach( async function(){
+    CreateCubeContract = await ethers.getContractFactory("CreateCubeContract");
+    [deployer, addr1, addr2,...addrs] = await ethers.getSigners();
+    cube = await CreateCubeContract.deploy();
   });
 
-  describe("Deployment", function () {
+describe("Deployment", function(){
 
-    it("Should track name and symbol of the nft collection", async function () {
-      // This test expects the owner variable stored in the contract to be equal
-      // to our Signer's owner.
-      const nftName = "CUBE(NFT)"
-      const nftSymbol = "CNT"
-      expect(await nft.name()).to.equal(nftName);
-      expect(await nft.symbol()).to.equal(nftSymbol);
-    });
+  it("Should has the same name and right symbol", async function(){
+    let name = "CUBE(NFT)";
+    let symbol = "CNT";
+    expect(await cube.name()).to.equal(name);
+    expect(await cube.symbol()).to.equal(symbol);
+  });
+});
+describe("Minting Cube NFTs", function(){
+  it("Should able to mint cube NFT", async function (){
+    //Minitng NFT from two addresses 
+    await cube.connect(addr1).createCube("0x00");
+    await cube.connect(addr2).createCube("0x00");
+    //Checking addr1 and addr2 balances for confirmation
+    let bal= await cube.balanceOf(addr1.address);
+    expect(bal).to.equal("1");
+    let bal2= await cube.balanceOf(addr2.address);
+    expect(bal2).to.equal("1");
+  });
+});
+describe("Transfer From Functionality", function(){
+  it("Should be able to to transfer NFT", async function (){
+    //Minting NFT from addr1
+    await cube.connect(addr1).createCube("0x00");
+    //Checking balamces of addr1 and addr2
+    let initialBal1 = await cube.balanceOf(addr1.address);
+    expect(initialBal1).to.equal("1");
+    let initialBal2= await cube.balanceOf(addr2.address);
+    expect(initialBal2).to.equal("0");
+    //Transfering NFT from Addr1 to addr2
+    await cube.connect(addr1).transferCube(addr1.address, addr2.address, "0" );
+    //Checking balances after the transfer
+    let finalBal1= await cube.balanceOf(addr1.address);
+    expect(finalBal1).to.equal("0");
+    let finalBal2= await cube.balanceOf(addr2.address);
+    expect(finalBal2).to.equal("1");
+  });
+  it("it should allow thrid party to spend on behalf of owner", async function(){
+    // Creating cube nft by addr1
+    await cube.connect(addr1).createCube("0x00");
+    //checking balance before transfer 
+    expect(await cube.balanceOf(addr1.address)).to.equal("1");
+    expect(await cube.balanceOf(addr2.address)).to.equal("0");
+    // approving deployer to spend on addr1 behalf
+    await cube.connect(addr1).setApprovalForAll(deployer.address, true);
+    //Deployer transfer addr1 nft to addr2
+    await cube.connect(deployer).transferCube(addr1.address, addr2.address, "0");
+    //checking balance of addr1 and addr2 
+    expect(await cube.balanceOf(addr1.address)).to.equal("0");
+    expect(await cube.balanceOf(addr2.address)).to.equal("1");
+  });
+});
+});
+describe("Weth9 Contract", function() {
+  beforeEach( async function(){
+    WethContract = await ethers.getContractFactory("WETH9");
+    [deployer, addr1, addr2,...addrs]= await ethers.getSigners();
+    weth9= await WethContract.deploy()
+  });
+  describe("Deployment", function(){
+    it("Should has the same name, symbol and decimals", async function(){
+      let name = "Wrapped Ether";
+      let symbol = "WETH";
+      let decimals = 18;
 
-    it("Should track feeAccount and feePercent of the marketplace", async function () {
-      expect(await marketplace.feeAccount()).to.equal(deployer.address);
-      expect(await marketplace.feePercent()).to.equal(feePercent);
+      expect (await weth9.name()).to.equal(name);
+      expect (await weth9.symbol()).to.equal(symbol);
+      expect (await weth9.decimals()).to.equal(decimals);
     });
   });
-
-  describe("Minting NFTs", function () {
-
-    it("Should track each minted NFT", async function () {
-      // addr1 mints an nft
-      await nft.connect(addr1).createCube(URI)
-      expect(await nft.tokenCount()).to.equal(1);
-      expect(await nft.balanceOf(addr1.address)).to.equal(1);
-      expect(await nft.tokenURI(1)).to.equal(URI);
-      // addr2 mints an nft
-      await nft.connect(addr2).createCube(URI)
-      expect(await nft.tokenCount()).to.equal(2);
-      expect(await nft.balanceOf(addr2.address)).to.equal(1);
-      expect(await nft.tokenURI(2)).to.equal(URI);
+  describe("Deposit Functionality Testing", async function(){
+    it("Should be able to deposit the ether", async function(){
+      //Depositing ether into the weth contract
+      await weth9.connect(addr1).deposit({value: ethers.utils.parseEther("1")});
+      //Checing balance of addr1 for confirmation
+      let bal1= await weth9.balanceOf(addr1.address);
+      expect(bal1).to.equal("1000000000000000000");
     });
+  });
+  describe("WithDraw Functionality", async function(){
+    it("Should be able to withdraw ether", async function(){
+      //deposit 1 ether into weth contract by addr1
+      await weth9.connect(addr1).deposit({value: ethers.utils.parseEther("1")});
+      //checkig balance before withdraw
+      let initialBal= await weth9.balanceOf(addr1.address);
+      expect(initialBal).to.equal("1000000000000000000");
+      //Withdrawing ether from the contract
+      await weth9.connect(addr1).withdraw("1000000000000000000");
+      //checking balances after withdrawing 
+      let finalBal= await weth9.balanceOf(addr1.address);
+      expect(finalBal).to.equal("0");
+    });
+  });
+  describe("transfer and transferFrom functionality", function(){
+    it("Should be able to trasfer weth from one account to another", async function(){
+      //Depositing weth form addr1 address
+      await weth9.connect(addr1).deposit({value: ethers.utils.parseEther("1")});
+      //Checking balances of addr1 and addr2 before transfer
+      let initialBal1= await weth9.balanceOf(addr1.address);
+      expect(initialBal1).to.equal("1000000000000000000");
+      let initialBal2= await weth9.balanceOf(addr2.address);
+      expect(initialBal2).to.equal("0");
+      //Transfering from addr1 to addr2
+      await weth9.connect(addr1).transfer(addr2.address, "1000000000000000000");
+      //Checking balances after transfer
+      let finalBal1= await weth9.balanceOf(addr1.address);
+      expect(finalBal1).to.equal("0");
+      let finalBal2= await weth9.balanceOf(addr2.address);
+      expect(finalBal2).to.equal("1000000000000000000");
+    });
+
+    it("It should allow a thirdparty to spend on owner behalf", async function(){
+      //deposit 1 ether from addr1
+      await weth9.connect(addr1).deposit({value: ethers.utils.parseEther("1")});
+      expect(await weth9.balanceOf(addr1.address)).to.equal("1000000000000000000");
+      //approving deployer to spend on addr1 behalf
+      await weth9.connect(addr1).approve(deployer.address, "1000000000000000000");
+      // deployer spending on addr1 behalf
+      await weth9.connect(deployer).transferFrom(addr1.address, addr2.address, "1000000000000000000");
+      //Checing balnces after transfer 
+      expect(await weth9.balanceOf(addr1.address)).to.equal("0");
+      expect(await weth9.balanceOf(addr2.address)).to.equal("1000000000000000000");
+    });
+  });
+});
+describe("Auction Contract", function() {
+  beforeEach( async function(){
+    //Getting instances of all the contracts
+    createAuctionContract= await ethers.getContractFactory("createAuctionContract");
+    CreateCubeContract= await ethers.getContractFactory("CreateCubeContract");
+    WethContract= await ethers.getContractFactory("WETH9");
+    //Gettign the signers
+    [deployer, addr1, addr2, ...addrs]= await ethers.getSigners();
+    // Deploying the contracts
+    auction= await createAuctionContract.deploy("Robot Drop Auction");
+    cube= await CreateCubeContract.deploy();
+    weth9= await WethContract.deploy();
+  });
+  describe("Deployment", function(){
+    it("Should have same name as of the contracts", async function(){
+      let name = "Robot Drop Auction";
+      let wethname= "Wrapped Ether";
+      let cubename= "CUBE(NFT)";
+      expect(await auction.name()).to.equal(name);
+      expect(await cube.name()).to.equal(cubename);
+      expect(await weth9.name()).to.equal(wethname);
+    });
+  });
+  describe("Checking new Auction functionality", function(){
+    it("Should be able to create new auction", async function(){
+      /**
+       * First lets create cube nft using cube contract
+       * Give approval to auction address
+       */
+      await cube.connect(addr1).createCube("0x00");
+      await cube.connect(addr1).setApprovalForAll(auction.address, true);
+      //lets create a new auction now
+      await auction.connect(addr1).newAuction(
+        cube.address,
+        weth9.address,
+        "0",
+        toWei("0.1"),
+        "1669913626",
+        "1669914600"
+      );
+      // Confirming auction by index
+      expect(await auction.index()).to.equal("1");
+    });
+    it("Should let other to bid on the open auction", async function(){
+      // First deposit money into weth contract 
+      await weth9.connect(addr2).deposit({value: ethers.utils.parseEther("1")});
+      //Approving auction address
+      await weth9.connect(addr2).approve(auction.address, true);
+      // Biding on the auction 
+      await auction.connect(addr2).bid("0", toWei("0.1"));
+
+    })
   })
-
-  describe("Making marketplace items", function () {
-    let price = 1
-    let result 
-    beforeEach(async function () {
-      // addr1 mints an nft
-      await nft.connect(addr1).createCube(URI)
-      // addr1 approves marketplace to spend nft
-      await nft.connect(addr1).setApprovalForAll(marketplace.address, true)
-    })
-
-
-    it("Should track newly created item, transfer NFT from seller to marketplace and emit Offered event", async function () {
-      // addr1 offers their nft at a price of 1 ether
-      await expect(marketplace.connect(addr1).makeItem(nft.address, 1 , toWei(price)))
-        .to.emit(marketplace, "Offered")
-        .withArgs(
-          1,
-          nft.address,
-          1,
-          toWei(price),
-          addr1.address
-        )
-      // Owner of NFT should now be the marketplace
-      expect(await nft.ownerOf(1)).to.equal(marketplace.address);
-      // Item count should now equal 1
-      expect(await marketplace.itemCount()).to.equal(1)
-      // Get item from items mapping then check fields to ensure they are correct
-      const item = await marketplace.items(1)
-      expect(item.itemId).to.equal(1)
-      expect(item.nft).to.equal(nft.address)
-      expect(item.tokenId).to.equal(1)
-      expect(item.price).to.equal(toWei(price))
-      expect(item.sold).to.equal(false)
-    });
-
-    it("Should fail if price is set to zero", async function () {
-      await expect(
-        marketplace.connect(addr1).makeItem(nft.address, 1, 0)
-      ).to.be.revertedWith("Price must be greater than zero");
-    });
-
-  });
-  describe("Purchasing marketplace items", function () {
-    let price = 2
-    let fee = (feePercent/100)*price
-    let totalPriceInWei
-    beforeEach(async function () {
-      // addr1 mints an nft
-      await nft.connect(addr1).createCube(URI)
-      // addr1 approves marketplace to spend tokens
-      await nft.connect(addr1).setApprovalForAll(marketplace.address, true)
-      // addr1 makes their nft a marketplace item.
-      await marketplace.connect(addr1).makeItem(nft.address, 1 , toWei(price))
-    })
-    it("Should update item as sold, pay seller, transfer NFT to buyer, charge fees and emit a Bought event", async function () {
-      const sellerInitalEthBal = await addr1.getBalance()
-      const feeAccountInitialEthBal = await deployer.getBalance()
-      // fetch items total price (market fees + item price)
-      totalPriceInWei = await marketplace.getTotalPrice(1);
-      // addr 2 purchases item.
-      await expect(marketplace.connect(addr2).purchaseItem(1, {value: totalPriceInWei}))
-      .to.emit(marketplace, "Bought")
-        .withArgs(
-          1,
-          nft.address,
-          1,
-          toWei(price),
-          addr1.address,
-          addr2.address
-        )
-      const sellerFinalEthBal = await addr1.getBalance()
-      const feeAccountFinalEthBal = await deployer.getBalance()
-      // Item should be marked as sold
-      expect((await marketplace.items(1)).sold).to.equal(true)
-      // Seller should receive payment for the price of the NFT sold.
-      expect(+fromWei(sellerFinalEthBal)).to.equal(+price + +fromWei(sellerInitalEthBal))
-      // feeAccount should receive fee
-      expect(+fromWei(feeAccountFinalEthBal)).to.equal(+fee + +fromWei(feeAccountInitialEthBal))
-      // The buyer should now own the nft
-      expect(await nft.ownerOf(1)).to.equal(addr2.address);
-    })
-    it("Should fail for invalid item ids, sold items and when not enough ether is paid", async function () {
-      // fails for invalid item ids
-      await expect(
-        marketplace.connect(addr2).purchaseItem(2, {value: totalPriceInWei})
-      ).to.be.revertedWith("item doesn't exist");
-      await expect(
-        marketplace.connect(addr2).purchaseItem(0, {value: totalPriceInWei})
-      ).to.be.revertedWith("item doesn't exist");
-      // Fails when not enough ether is paid with the transaction. 
-      // In this instance, fails when buyer only sends enough ether to cover the price of the nft
-      // not the additional market fee.
-      await expect(
-        marketplace.connect(addr2).purchaseItem(1, {value: toWei(price)})
-      ).to.be.revertedWith("not enough ether to cover item price and market fee"); 
-      // addr2 purchases item 1
-      await marketplace.connect(addr2).purchaseItem(1, {value: totalPriceInWei})
-      // addr3 tries purchasing item 1 after its been sold 
-      const addr3 = addrs[0]
-      await expect(
-        marketplace.connect(addr3).purchaseItem(1, {value: totalPriceInWei})
-      ).to.be.revertedWith("item already sold");
-    });
-  })
-})
+});
