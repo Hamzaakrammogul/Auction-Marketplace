@@ -1,6 +1,5 @@
-//SPDX-License-Identifier: MIT
-pragma solidity >=0.4.18;
-import "hardhat/console.sol";
+//SPDX-Licnese-Identifier: MIT
+pragma solidity ^0.4.18;
 
 contract WETH9 {
     string public name     = "Wrapped Ether";
@@ -15,7 +14,7 @@ contract WETH9 {
     mapping (address => uint)                       public  balanceOf;
     mapping (address => mapping (address => uint))  public  allowance;
 
-    fallback() external payable {
+    function() public payable {
         deposit();
     }
     function deposit() public payable {
@@ -25,7 +24,7 @@ contract WETH9 {
     function withdraw(uint wad) public {
         require(balanceOf[msg.sender] >= wad);
         balanceOf[msg.sender] -= wad;
-       payable( msg.sender).transfer(wad);
+        msg.sender.transfer(wad);
       emit  Withdrawal(msg.sender, wad);
     }
 
@@ -49,7 +48,7 @@ contract WETH9 {
     {
         require(balanceOf[src] >= wad);
 
-        if (src != msg.sender && allowance[src][msg.sender] != type(uint256).max) {
+        if (src != msg.sender && allowance[src][msg.sender] != uint(-1)) {
             require(allowance[src][msg.sender] >= wad);
             allowance[src][msg.sender] -= wad;
         }

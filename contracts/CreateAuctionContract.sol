@@ -1,74 +1,84 @@
-// SPDX-License-Identifier: MIT
-pragma solidity >= 0.7.0 <0.9.0;
-
+// SPDX-License-Identifier: SEE LICENSE IN LICENSE
+pragma solidity >= 0.7.0 < 0.9.0;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "hardhat/console.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract Auctions is IERC721Receiver {
-    // Name of the marketplace
+
+contract createAuctionContract is IERC721Receiver {
+
+    //Name of the marketplace 
     string public name;
+    //Index of Auction
+    uint256 public index =0;
 
-    // Index of auctions
-    uint256 public index = 0;
-
-    // Structure to define auction properties
-    struct Auction {
-        uint256 index; // Auction Index
-        address CubeContractAddress; // Address of the ERC721 NFT contract
-        address addressPaymentToken; // Address of the ERC20 Weth Payment Token contract
-        uint256 nftId; // NFT Id
-        address creator; // Creator of the Auction
-        address payable currentBidOwner; // Address of the highest bider
+    //Structure to define auction properties 
+    struct auction{
+        uint256 index; //Auction index or in our project drop Id 
+        address createCubeContract; //Address of NFT contract address 
+        address weth9; // Address of payment contract in our case weth9
+        uint256 nftId; //NFT id
+        address auctioneer; // address of creator of auctioneer 
+        address payable currentBidOwner; // Address of highhest bid owner
         uint256 currentBidPrice; // Current highest bid for the auction
-        uint256 startAuction;
-        uint256 endAuction; // Timestamp for the end day&time of the auction
-        uint256 bidCount; // Number of bid placed on the auction
+        uint256 startAuctionTimestamp; // Timestamp of when auction start
+        uint256 endAuctionTimestamp; // Timestamp of when auction will end 
+        uint256 bidCount; // Number of bid placed on the auction 
     }
+    //Array of all auction 
+    auction[] private allAuctions;
 
-    // Array will all auctions
-    Auction[] private allAuctions;
-
-    // Public event to notify that a new auction has been created
-    event NewAuction(
+    //Public event to notify that a new auction has been created 
+     event newAuctions (
         uint256 index,
-        address CubeContractAddress,
-        address addressPaymentToken,
+        address createCubeContract,
+        address weth9,
         uint256 nftId,
-        address Auctioneer,
+        address auctioneer,
         address currentBidOwner,
         uint256 currentBidPrice,
-        uint256 startAuction,
-        uint256 endAuction,
+        uint256 startAuctionTimestamp,
+        uint256 endAuctionTimestamp,
         uint256 bidCount
+     );
+
+    //Public event to notify that a new bid has been placed 
+     event newBidonAuction(
+        uint256 auctionIndex,
+        address bidder,
+        uint256 newBid
+     );
+
+    //Public event to notify the winner has calimed the NFT 
+    event claimedNFT(
+        uint256 auctionIndex,
+        uint256 nftId,
+        address winner
     );
 
-    // Public event to notify that a new bid has been placed
-    event NewBidOnAuction(uint256 auctionIndex, address bidder, uint256 newBid);
+    //Public event that Auctioneer has claimed funds
+    event claimedFunds(
+        uint256 auctionIndex,
+        uint256 nftId,
+        address auctioneer
+    );
 
-    // Public event to notif that winner of an
-    // auction claim for his reward
-    event NFTClaimed(uint256 auctionIndex, uint256 nftId, address claimedBy);
+    //Public event to notfiy that NFT has be refunded by the auctioneer
+    event refundedNFT(
+        uint256 auctionIndex,
+        uint256 nftId,
+        address auctioneer
+    );
 
-    // Public event to notify that the creator of
-    // an auction claimed for his money
-    event TokensClaimed(uint256 auctionIndex, uint256 nftId, address claimedBy);
-
-    // Public event to notify that an NFT has been refunded to the
-    // creator of an auction
-    event NFTRefunded(uint256 auctionIndex, uint256 nftId, address claimedBy);
-
-    // constructor of the contract
-    constructor(string memory _name) {
+    //constructor of the contract
+    constructor(string memory _name)
+    {
         name = _name;
     }
-
     /**
-     * Check if a specific address is
-     * a contract address
-     * @param _addr: address to verify
+     * Check if the addres is a contract address
+     * @param _addr address to verify
      */
     function isContract(address _addr) private view returns (bool) {
         uint256 size;
@@ -77,110 +87,113 @@ contract Auctions is IERC721Receiver {
         }
         return size > 0;
     }
-
     /**
      * Create a new auction of a specific NFT
-     * @param _cubeContractAddress address of the ERC721 NFT contract
-     * @param _addressPaymentToken address of the ERC20 payment token contract
-     * @param _nftId Id of the NFT for sale
-     * @param _minBid Inital bid decided by the creator of the auction
-     * @param _endAuction Timestamp with the end date and time of the auction
+     * @param _createCubeContract address of cube contract
+     * @param _weth9 address of payment accout 
+     * @param _minBid minimum value of bid 
+     * @param _startAuction Timestamp for start auction 
+     * @param _endAuction Timestamp to end auction
+     * @param _nftId Id of cube NFT 
      */
-    function createAuction(
-        address _cubeContractAddress,
-        address _addressPaymentToken,
+    function newAuction(
+        address _createCubeContract,
+        address _weth9,
         uint256 _nftId,
         uint256 _minBid,
         uint256 _startAuction,
         uint256 _endAuction
     ) external returns (uint256) {
-        //Check is addresses are valid
-        require(
-            isContract(_cubeContractAddress),
-            "Invalid NFT Collection contract address"
-        );
-        require(
-            isContract(_addressPaymentToken),
-            "Invalid Payment Token contract address"
-        );
-          // Check if the startAuction time is valid
-        require(_startAuction <= block.timestamp, "Invalid start date for auction");
+        
+        //Check if address is valid 
+        require(isContract(_createCubeContract), "Invalid contract address");
+        require(isContract(_weth9), "Invaild contract address");
 
-        // Check if the endAuction time is valid
-        require(_endAuction > block.timestamp, "Invalid end date for auction");
+        //check the minimun bid validity 
+        require(_minBid > 0, "Invalid minimum bid");
 
-        // Check if the initial bid price is > 0
-        require(_minBid > 0, "Invalid initial bid price");
+        //check the startAuction and endAuction Timestamp
+        require(_startAuction <= block.timestamp, "Invalid start auction timestamp");
+        require(_endAuction > block.timestamp, "Invaid end auction timestamp");
 
-        // Get NFT collection contract
-        IERC721 cubeNFT = IERC721(_cubeContractAddress);
+        //Get the NFT Contract 
+        IERC721 cubeNFT = IERC721(_createCubeContract);
 
-        // Make sure the sender that wants to create a new auction
-        // for a specific NFT is the owner of this NFT
+        //Confirm that msg sender is owner of the NFT 
         require(
             cubeNFT.ownerOf(_nftId) == msg.sender,
-            "Caller is not the owner of the NFT"
+            "You are not the owner of the NFT"
         );
 
-       
-        //Make sure use setApprovalForAll function to allolw auction address to change ownership
-        // Lock NFT in Marketplace contract
+        /**
+         * Transfer NFT from msg sender to this contract
+         * Only possible if the owner of NFT has approved this contract 
+         * We can use setApprovalForAll since only adimn will be creating NFT
+         */
         cubeNFT.transferFrom(msg.sender, address(this), _nftId);
 
-        //Casting from address to address payable
+        //Casting from address to address payable 
         address payable currentBidOwner = payable(address(0));
-        // Create new Auction object
-        Auction memory newAuction = Auction({
-            index: index,
-            CubeContractAddress: _cubeContractAddress,
-            addressPaymentToken: _addressPaymentToken,
-            nftId: _nftId,
-            creator: msg.sender,
-            currentBidOwner: currentBidOwner,
-            currentBidPrice: _minBid,
-            startAuction: _startAuction,
-            endAuction: _endAuction,
-            bidCount: 0
+
+        //New object of struct auction 
+        auction memory newAuc = auction({
+         index: index,
+         createCubeContract: _createCubeContract,
+         weth9: _weth9,
+         nftId: _nftId,
+         auctioneer: msg.sender,
+         currentBidOwner: currentBidOwner,
+         currentBidPrice: _minBid,
+         startAuctionTimestamp: _startAuction,
+         endAuctionTimestamp: _endAuction,
+         bidCount: 0
         });
-
-        //update list
-        allAuctions.push(newAuction);
-
-        // increment auction sequence
+   
+        allAuctions.push(newAuc);
+        //Increment auction index
         index++;
 
-        // Trigger event and return index of new auction
-        emit NewAuction(
-            index,
-            _cubeContractAddress,
-            _addressPaymentToken,
-            _nftId,
-            msg.sender,
-            currentBidOwner,
-            _minBid,
-            _startAuction,
-            _endAuction,
-            0
+        //Emit the newAuction Eveny 
+        emit newAuctions(
+        index,
+        _createCubeContract,
+        _weth9,
+        _nftId,
+        msg.sender,
+        currentBidOwner,
+        _minBid,
+        _startAuction,
+        _endAuction,
+        0 
         );
+
         return index;
+
     }
 
     /**
-     * Check if an auction is open
-     * @param _auctionIndex Index of the auction
+     * Check if the auction is still open 
+     * @param _auctionIndex is index of current auction
      */
-    function isOpen(uint256 _auctionIndex) public view returns (bool) {
-        Auction storage auction = allAuctions[_auctionIndex];
-        if (block.timestamp >= auction.endAuction) return false;
-        return true;
-    }
-
+    function isOpen(
+        uint256 _auctionIndex
+        ) public view returns(bool)
+        {
+            auction storage Auction = allAuctions[_auctionIndex];
+            if(block.timestamp >= Auction.endAuctionTimestamp){
+                return false;
+            }else {
+                return true;
+            }
+        }
+        
     /**
      * Return the address of the current highest bider
      * for a specific auction
      * @param _auctionIndex Index of the auction
      */
-    function getCurrentBidOwner(uint256 _auctionIndex)
+    function getCurrentBidOwner(
+        uint256 _auctionIndex)
         public
         view
         returns (address)
@@ -213,49 +226,46 @@ contract Auctions is IERC721Receiver {
         returns (bool)
     {
         require(_auctionIndex < allAuctions.length, "Invalid auction index");
-        Auction storage auction = allAuctions[_auctionIndex];
+        auction storage Auction = allAuctions[_auctionIndex];
 
         // check if auction is still open
         require(isOpen(_auctionIndex), "Auction is not open");
 
         // check if new bid price is higher than the current one
         require(
-            _newBid > auction.currentBidPrice,
+            _newBid > Auction.currentBidPrice,
             "New bid price must be higher than the current bid"
         );
 
         // check if new bider is not the owner
         require(
-            msg.sender != auction.creator,
+            msg.sender != Auction.auctioneer,
             "Creator of the auction cannot place new bid"
         );
 
         // get Weth ERC20 token contract
-        ERC20 paymentToken = ERC20(auction.addressPaymentToken);
+        IERC20 paymentToken = IERC20(Auction.weth9);
 
         // transfer token from new bider account to the marketplace account
         // to lock the tokens
-        require(
-            paymentToken.transferFrom(msg.sender, address(this), _newBid),
-            "Tranfer of Weth failed"
-        );
-
+        paymentToken.transferFrom(msg.sender, address(this), _newBid);
+       
         // new bid is valid so must refund the current bid owner (if there is one!)
-        if (auction.bidCount > 0) {
+        if (Auction.bidCount > 0) {
             paymentToken.transfer(
-                auction.currentBidOwner,
-                auction.currentBidPrice
+                Auction.currentBidOwner,
+                Auction.currentBidPrice
             );
         }
       else{
         // update auction info
         address payable newBidOwner = payable(msg.sender);
-        auction.currentBidOwner = newBidOwner;
-        auction.currentBidPrice = _newBid;
-        auction.bidCount++;
+        Auction.currentBidOwner = newBidOwner;
+        Auction.currentBidPrice = _newBid;
+        Auction.bidCount++;
 
         // Trigger public event
-        emit NewBidOnAuction(_auctionIndex, msg.sender, _newBid);
+        emit newBidonAuction(_auctionIndex, msg.sender, _newBid);
        
       }
        return true;
@@ -275,28 +285,28 @@ contract Auctions is IERC721Receiver {
         require(!isOpen(_auctionIndex), "Auction is still open");
 
         // Get auction
-        Auction storage auction = allAuctions[_auctionIndex];
+        auction storage Auction = allAuctions[_auctionIndex];
 
         // Check if the caller is the winner of the auction
         require(
-            auction.currentBidOwner == msg.sender,
+            Auction.currentBidOwner == msg.sender,
             "Only highest current bidder can claim NFT"
         );
 
         // Get NFT collection contract
         IERC721 cubeNFT = IERC721(
-            auction.CubeContractAddress
+            Auction.createCubeContract
         );
         // Transfer NFT from marketplace contract
         // to the winner address
    
             cubeNFT.transferFrom(
                 address(this),
-                auction.currentBidOwner,
-                auction.nftId
+                Auction.currentBidOwner,
+                Auction.nftId
             );
 
-        emit NFTClaimed(_auctionIndex, auction.nftId, msg.sender);
+        emit claimedNFT(_auctionIndex, Auction.nftId, msg.sender);
     }
 
     /**
@@ -315,41 +325,38 @@ contract Auctions is IERC721Receiver {
         require(!isOpen(_auctionIndex), "Auction is still open");
 
         // Get auction
-        Auction storage auction = allAuctions[_auctionIndex];
+        auction storage Auction = allAuctions[_auctionIndex];
 
         // Check if the caller is the creator of the auction
         require(
-            auction.creator == msg.sender,
+            Auction.auctioneer == msg.sender,
             "Only Auction creator can claim funds"
         );
 
-        if (auction.currentBidOwner== address(0)){
+        if (Auction.currentBidOwner== address(0)){
             
         // Get NFT Collection contract
         IERC721 cubeNFT = IERC721(
-            auction.CubeContractAddress
+            Auction.createCubeContract
         );
         // Transfer NFT back from marketplace contract
         // to the creator of the auction
         cubeNFT.transferFrom(
             address(this),
-            auction.creator,
-            auction.nftId
+            Auction.auctioneer,
+            Auction.nftId
         );
 
-        emit NFTRefunded(_auctionIndex, auction.nftId, msg.sender);
+        emit refundedNFT(_auctionIndex, Auction.nftId, msg.sender);
 
         }else {
-
-     
-
         // Get ERC20 Payment token contract
-        ERC20 paymentToken = ERC20(auction.addressPaymentToken);
+        IERC20 paymentToken = IERC20(Auction.weth9);
         // Transfer locked tokens from the market place contract
         // to the wallet of the creator of the auction
-        paymentToken.transfer(auction.creator, auction.currentBidPrice);
+        paymentToken.transfer(Auction.auctioneer, Auction.currentBidPrice);
 
-        emit TokensClaimed(_auctionIndex, auction.nftId, msg.sender);
+        emit claimedFunds(_auctionIndex, Auction.nftId, msg.sender);
         }
     }
 
@@ -367,32 +374,32 @@ contract Auctions is IERC721Receiver {
         require(!isOpen(_auctionIndex), "Auction is still open");
 
         // Get auction
-        Auction storage auction = allAuctions[_auctionIndex];
+        auction storage Auction = allAuctions[_auctionIndex];
 
         // Check if the caller is the creator of the auction
         require(
-            auction.creator == msg.sender,
+            Auction.auctioneer == msg.sender,
             "Tokens can be claimed only by the creator of the auction"
         );
 
         require(
-            auction.currentBidOwner == address(0),
+            Auction.currentBidOwner == address(0),
             "Existing bider for this auction"
         );
 
         // Get NFT Collection contract
         IERC721 cubeNFT = IERC721(
-            auction.CubeContractAddress
+            Auction.createCubeContract
         );
         // Transfer NFT back from marketplace contract
         // to the creator of the auction
         cubeNFT.transferFrom(
             address(this),
-            auction.creator,
-            auction.nftId
+            Auction.auctioneer,
+            Auction.nftId
         );
 
-        emit NFTRefunded(_auctionIndex, auction.nftId, msg.sender);
+        emit refundedNFT(_auctionIndex, Auction.nftId, msg.sender);
     }
 
     function onERC721Received(
@@ -403,4 +410,5 @@ contract Auctions is IERC721Receiver {
     ) public virtual override returns (bytes4) {
         return this.onERC721Received.selector;
     }
+
 }
