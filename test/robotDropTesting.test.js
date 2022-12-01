@@ -182,18 +182,17 @@ describe("Auction Contract", function() {
         "0",
         toWei("0.1"),
         "1669913626",
-        "1669914600"
+        "1669915500"
       );
       // Confirming auction by index
       expect(await auction.index()).to.equal("1");
-    });
-    it("Should let other to bid on the open auction", async function(){
+      
       // First deposit money into weth contract 
       await weth9.connect(addr2).deposit({value: ethers.utils.parseEther("1")});
       //Approving auction address
-      await weth9.connect(addr2).approve(auction.address, true);
+      await weth9.connect(addr2).approve(auction.address, "1000000000000000000");
       // Biding on the auction 
-      await auction.connect(addr2).bid("0", toWei("0.1"));
+      await auction.connect(addr2).bid("0", toWei("1"));
 
     })
   })
