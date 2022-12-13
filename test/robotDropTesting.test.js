@@ -1,8 +1,10 @@
 const { expect } = require("chai"); 
+const { ethers } = require("hardhat");
 
 const toWei = (num) => ethers.utils.parseEther(num.toString());
 const fromWei = (num) => ethers.utils.formatEther(num);
 
+let CreateNFTContract;
 let CreateCubeContract;
 let cube;
 let WethContract;
@@ -194,6 +196,30 @@ describe("Auction Contract", function() {
       // Biding on the auction 
       await auction.connect(addr2).bid("0", toWei("1"));
 
-    })
-  })
+    });
+  });
+});
+describe("Create NFT Contract", function(){
+
+  beforeEach("Deploy Function", async function(){
+    CreateNFTContract = await ethers.getContractFactory("CreateNFTContract");
+    [deployer, addr1, addr2, ...addrs]= await ethers.getSigners();
+    NFT = await CreateNFTContract.deploy();
+  });
+
+  describe("createBatch Testing", function(){
+    let name = "CreateNFTContract";
+    it.only("Should mint NFT", async function(){
+    //Minting from addr1
+    await NFT.connect(addr1).newBatch([0], [1], "0x00");
+    //Checking Balance of addr1
+    let bal= await NFT.balanceOf(addr1.address, 0);
+    expect(bal).to.equal("1");
+    //Minting from addr2
+    await NFT.connect(addr2).newBatch([0], [2], "0x00");
+    //Checking balance of addr2
+    let bal2= await NFT.balanceOf(addr2.address, 1);
+    expect(bal2).to.equal("2");
+  });
+  });
 });
