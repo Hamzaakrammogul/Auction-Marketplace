@@ -39,7 +39,7 @@ $ npx hardhat test
 ### Deploy contract to network (requires Mnemonic and Infura API key)
 
 ```
-npx hardhat run --network goerli ./scripts/deploy.ts
+npx hardhat run scripts/deploy.js --network goerli 
 ```
 
 ### Validate a contract with etherscan (requires API key)
