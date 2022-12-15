@@ -13,6 +13,51 @@ let createAuctionContract;
 let auction;
 let addr1, addr2, deployer, addrs;
 
+describe("Create NFT Contract", function(){
+
+  beforeEach("Deploy Function", async function(){
+    CreateNFTContract = await ethers.getContractFactory("CreateNFTContract");
+    [deployer, addr1, addr2, ...addrs]= await ethers.getSigners();
+    NFT = await CreateNFTContract.deploy("Robot Drop NFT", "RD(NFT)");
+  });
+
+  describe("createBatch Testing", function(){
+    let name = "Robot Drop NFT";
+    let symbol= "RD(NFT)";
+  it("Check Name and Symbol", async function(){
+
+    let contractName= await NFT.name();
+    let contractSymbol= await NFT.symbol();
+    expect(contractName).to.equal(name);
+    expect(contractSymbol).to.equal(symbol);
+  });
+  
+  it("Testing newBatch Fucntionality", async function(){
+    //Minting from addr1
+    await NFT.connect(addr1).newBatch([0], [1], "0x00");
+    //Checking Balance of addr1
+    let bal= await NFT.balanceOf(addr1.address, 0);
+    expect(bal).to.equal("1");
+    //Minting from addr2
+    await NFT.connect(addr2).newBatch([0], [2], "0x00");
+    //Checking balance of addr2
+    let bal2= await NFT.balanceOf(addr2.address, 0);
+    expect(bal2).to.equal("2");
+  });
+
+  it("Testing batchMinting functionality", async function (){
+    //Balance before Minting
+    let initialBal= await NFT.balanceOf(addr1.address, 0);
+    expect(initialBal).to.equal(0);
+    //Minting from addr1
+    await NFT.connect(addr1).batchMinting([0], [1], ["0x00"]);
+    //balance after Mintig
+    let finalBal = await NFT.balanceOf(addr1.address, 0);
+    expect(finalBal).to.equal(1);
+  })
+  });
+});
+
 describe("Create Cube Contract", function () {
   beforeEach( async function(){
     CreateCubeContract = await ethers.getContractFactory("CreateCubeContract");
@@ -188,38 +233,13 @@ describe("Auction Contract", function() {
       );
       // Confirming auction by index
       expect(await auction.index()).to.equal("1");
-      
       // First deposit money into weth contract 
       await weth9.connect(addr2).deposit({value: ethers.utils.parseEther("1")});
-      //Approving auction address
+      // Approving auction address
       await weth9.connect(addr2).approve(auction.address, "1000000000000000000");
       // Biding on the auction 
       await auction.connect(addr2).bid("0", toWei("1"));
 
     });
-  });
-});
-describe("Create NFT Contract", function(){
-
-  beforeEach("Deploy Function", async function(){
-    CreateNFTContract = await ethers.getContractFactory("CreateNFTContract");
-    [deployer, addr1, addr2, ...addrs]= await ethers.getSigners();
-    NFT = await CreateNFTContract.deploy();
-  });
-
-  describe("createBatch Testing", function(){
-    let name = "CreateNFTContract";
-    it.only("Should mint NFT", async function(){
-    //Minting from addr1
-    await NFT.connect(addr1).newBatch([0], [1], "0x00");
-    //Checking Balance of addr1
-    let bal= await NFT.balanceOf(addr1.address, 0);
-    expect(bal).to.equal("1");
-    //Minting from addr2
-    await NFT.connect(addr2).newBatch([0], [2], "0x00");
-    //Checking balance of addr2
-    let bal2= await NFT.balanceOf(addr2.address, 1);
-    expect(bal2).to.equal("2");
-  });
   });
 });

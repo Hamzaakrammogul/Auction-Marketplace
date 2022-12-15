@@ -8,6 +8,9 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract CreateNFTContract is ERC1155, Ownable, ERC1155Supply{
 
+    string public name;
+    string public symbol;
+
     uint256 public constant Mastercraft = 0;
     uint256 public constant Legendary = 1;
     uint256 public constant Epic = 2;
@@ -15,13 +18,37 @@ contract CreateNFTContract is ERC1155, Ownable, ERC1155Supply{
     uint256 public constant Uncommon = 4;
     uint256 public constant Common = 5;
 
+    struct NFT {
+        uint256 id;
+        uint256 amount;
+        bytes data;
+    }
 
-    constructor() ERC1155("") {}
+    NFT [] allNFT;
+
+    constructor(string memory _name, string memory _symbol) ERC1155("") {
+        name = _name;
+        symbol= _symbol;
+    }
 
     function setURI(string memory newuri) public onlyOwner {
         _setURI(newuri);
     }
+    /**
+     * new function to batch minting of a NFT
+     * It accepts multiple hashes for data field
+     */
+     function batchMinting(uint256[] memory ids, uint256[] memory amounts, bytes[] memory data) external {
 
+        for(uint256 i=0; i < ids.length; i ++)
+
+        {
+            uint256 _id= ids[i];
+            uint256 _amount= amounts[i];
+            bytes memory _data= data[i];
+            mint(msg.sender, _id, _amount, _data );
+        }
+    }
     /**
      * Function to create new single or batch of NFTs 
     */
