@@ -15,22 +15,22 @@ contract NFT is ERC1155, Ownable {
     symbol = "RD(NFT)";
   }
 
-   /**
-     * new function to batch minting of a NFT
-     * It accepts multiple hashes for data field
-     */
-  function newBatch(uint256[] memory ids, uint256[] memory amounts, bytes[] memory data)
+  /**
+   * This function let user mint nfts
+   * And let user set URI for each and every NFT
+   */
+  function newBatch(uint256[] memory ids, uint256[] memory amounts, string[] memory ipfsHashes)
   external
   {
-
+     mintBatch(ids, amounts, "" );
         for(uint256 i=0; i < ids.length; i ++)
 
         {
             uint256 _id= ids[i];
-            uint256 _amount= amounts[i];
-            bytes memory _data= data[i];
-            _mint(msg.sender, _id, _amount, _data );
+            string memory _ipfshashes= ipfsHashes[i];
+            setURI(_id, _ipfshashes );
         }
+
   }
 
   function mint( uint _id, uint _amount, bytes memory data)
@@ -39,8 +39,8 @@ contract NFT is ERC1155, Ownable {
     _mint(msg.sender, _id, _amount, data);
   }
 
-  function mintBatch( uint[] memory _ids, uint[] memory _amounts, bytes memory data) 
-  external
+  function mintBatch(  uint256[] memory _ids, uint256[] memory _amounts, bytes memory data) 
+  internal
   {
     _mintBatch(msg.sender, _ids, _amounts, data);
   }
@@ -62,7 +62,7 @@ contract NFT is ERC1155, Ownable {
     _mintBatch(_from, _mintIds, _mintAmounts, "");
   }
 
-  function setURI(uint _id, string memory _uri) external onlyOwner {
+  function setURI(uint _id, string memory _uri) internal {
     tokenURI[_id] = _uri;
     emit URI(_uri, _id);
   }
