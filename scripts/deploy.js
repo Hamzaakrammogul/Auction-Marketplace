@@ -7,6 +7,12 @@ async function main() {
   
     const NFT = await ethers.getContractFactory("NFT");
     const nft = await NFT.deploy();
+
+    // const METAC = await ethers.getContractFactory("METAC");
+    // const metacoms = await METAC.deploy();
+
+    // const SwapContract = await ethers.getContractFactory("SwapContract");
+    // const swap = await SwapContract.deploy();
   
     console.log("Token address:", nft.address);
   }
