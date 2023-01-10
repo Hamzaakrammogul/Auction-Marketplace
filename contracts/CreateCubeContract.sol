@@ -12,14 +12,18 @@ contract CreateCubeContract is ERC721, ERC721Enumerable, ERC721URIStorage, Ownab
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
-
-    constructor() ERC721("CUBE(NFT)", "CNT") {}
+    address public auctionContractAddress;
+    constructor(address _auction) ERC721("CUBE(NFT)", "CNT") {
+        auctionContractAddress= _auction;
+    }
 
     function createCube(string memory uri) external returns (uint256) {
+       
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(msg.sender, tokenId);
         _setTokenURI(tokenId, uri);
+        approve(auctionContractAddress, tokenId);
 
         return (tokenId);
     }
@@ -63,6 +67,10 @@ contract CreateCubeContract is ERC721, ERC721Enumerable, ERC721URIStorage, Ownab
     ) public virtual returns (bool) {
         safeTransferFrom(from, to, tokenId);
         return true;
+    }
+    function setAuctionAddress(address newAuctionAddress) external onlyOwner
+    {
+        auctionContractAddress = newAuctionAddress;
     }
 
 }

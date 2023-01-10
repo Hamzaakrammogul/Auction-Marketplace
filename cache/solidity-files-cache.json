@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\Users\\Ameer Hamza\\Downloads\\ContractCreationOfRobotdrop\\MarketPlace\\contracts\\CreateAuctionContract.sol": {
-      "lastModificationDate": 1669894867001,
-      "contentHash": "7643e0268910c1ed465dba5b7168c230",
+      "lastModificationDate": 1673001774028,
+      "contentHash": "b017d52977aa7270e318aba64f8f0485",
       "sourceName": "contracts/CreateAuctionContract.sol",
       "solcConfig": {
         "version": "0.8.17",
@@ -29,12 +29,13 @@
         }
       },
       "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
         "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol",
         "@openzeppelin/contracts/token/ERC721/IERC721.sol",
         "@openzeppelin/contracts/token/ERC20/IERC20.sol"
       ],
       "versionPragmas": [
-        ">= 0.7.0 < 0.9.0"
+        "^0.8.9"
       ],
       "artifacts": [
         "createAuctionContract"
@@ -554,8 +555,8 @@
       ]
     },
     "C:\\Users\\Ameer Hamza\\Downloads\\ContractCreationOfRobotdrop\\MarketPlace\\contracts\\CreateCubeContract.sol": {
-      "lastModificationDate": 1669898839456,
-      "contentHash": "a0a3f76f1fbdfbeb08b22feda1ccb0f2",
+      "lastModificationDate": 1672932324685,
+      "contentHash": "2caf8d251efc8af31795aa73bf12af6e",
       "sourceName": "contracts/CreateCubeContract.sol",
       "solcConfig": {
         "version": "0.8.17",
@@ -856,46 +857,6 @@
         "ERC1155Supply"
       ]
     },
-    "C:\\Users\\Ameer Hamza\\Downloads\\ContractCreationOfRobotdrop\\MarketPlace\\contracts\\CreateNFTContract.sol": {
-      "lastModificationDate": 1671024744379,
-      "contentHash": "ba3f5b1e47535c8cd27c5c7580769b6e",
-      "sourceName": "contracts/CreateNFTContract.sol",
-      "solcConfig": {
-        "version": "0.8.17",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/token/ERC1155/ERC1155.sol",
-        "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol",
-        "@openzeppelin/contracts/access/Ownable.sol",
-        "@openzeppelin/contracts/utils/Strings.sol"
-      ],
-      "versionPragmas": [
-        ">= 0.7.0 < 0.9.0"
-      ],
-      "artifacts": [
-        "CreateNFTContract"
-      ]
-    },
     "C:\\Users\\Ameer Hamza\\Downloads\\ContractCreationOfRobotdrop\\MarketPlace\\contracts\\MarketPlaceContract.sol": {
       "lastModificationDate": 1669821424084,
       "contentHash": "dfe021830de5514faba35f43f57eada5",
@@ -1041,8 +1002,8 @@
       ]
     },
     "C:\\Users\\Ameer Hamza\\Downloads\\ContractCreationOfRobotdrop\\MarketPlace\\contracts\\NFT.sol": {
-      "lastModificationDate": 1672312962929,
-      "contentHash": "15daac011ba6b3543686e2d9c9678a69",
+      "lastModificationDate": 1672396343294,
+      "contentHash": "674e6f5f25a16edd6150d8e03299f7b8",
       "sourceName": "contracts/NFT.sol",
       "solcConfig": {
         "version": "0.8.17",
@@ -1079,12 +1040,12 @@
         "NFT"
       ]
     },
-    "C:\\Users\\Ameer Hamza\\Downloads\\ContractCreationOfRobotdrop\\MarketPlace\\contracts\\MEAC.sol": {
-      "lastModificationDate": 1672150745562,
-      "contentHash": "b18b8ef0cc064072a7c510a9f7b31be4",
-      "sourceName": "contracts/MEAC.sol",
+    "C:\\Users\\Ameer Hamza\\Downloads\\ContractCreationOfRobotdrop\\MarketPlace\\contracts\\oldAuction.sol": {
+      "lastModificationDate": 1672936023547,
+      "contentHash": "38ceab0f5739972aae06529a2e5514c0",
+      "sourceName": "contracts/oldAuction.sol",
       "solcConfig": {
-        "version": "0.6.7",
+        "version": "0.8.17",
         "settings": {
           "optimizer": {
             "enabled": false,
@@ -1108,65 +1069,18 @@
       },
       "imports": [],
       "versionPragmas": [
-        "^0.6.0",
-        "^0.6.2"
+        "^0.8.0",
+        "^0.8.0",
+        "^0.8.0",
+        "^0.8.0",
+        ">= 0.7.0 < 0.9.0"
       ],
       "artifacts": [
-        "Address",
-        "Context",
-        "ERC20",
+        "IERC165",
         "IERC20",
-        "METAC",
-        "Ownable",
-        "SafeMath"
-      ]
-    },
-    "C:\\Users\\Ameer Hamza\\Downloads\\ContractCreationOfRobotdrop\\MarketPlace\\contracts\\SwapContract.sol": {
-      "lastModificationDate": 1672220627503,
-      "contentHash": "a68297bcf5f849ee59c23b3ba26031e5",
-      "sourceName": "contracts/SwapContract.sol",
-      "solcConfig": {
-        "version": "0.6.7",
-        "settings": {
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.6.2",
-        "^0.6.0",
-        "^0.6.0",
-        "^0.6.0",
-        "^0.6.0",
-        "^0.6.7"
-      ],
-      "artifacts": [
-        "Address",
-        "AggregatorV3Interface",
-        "Context",
-        "ERC20",
-        "IERC20",
-        "MeacToken",
-        "Ownable",
-        "SafeMath",
-        "SwapContract"
+        "IERC721",
+        "IERC721Receiver",
+        "createAuctionContract"
       ]
     }
   }

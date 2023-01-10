@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-
 contract NFT is ERC1155, Ownable {
   using Counters for Counters.Counter;  
   string public name;
@@ -22,18 +21,18 @@ contract NFT is ERC1155, Ownable {
    * This function let user mint nfts
    * And let user set URI for each and every NFT
    */
-  function newBatch(uint256[] memory ids, uint256[] memory amounts, string[] memory ipfsHashes)
+  function newBatch(uint256 count, uint256[] memory amounts, string[] memory ipfsHashes)
   external
   {    
-        for(uint256 y=0; y<ids.length; y++)
+        uint256[] memory ids= new uint256 [](count);
+        for(uint256 y=0 ; y<ids.length; y++)
         {
             uint256 tokenId= _tokenIdCounter.current();
            _tokenIdCounter.increment();
-            ids[y] = ids[y] + tokenId;
+            ids[y] =ids[y] * 0 + tokenId;
         }
         mintBatch(ids, amounts, "");
         for(uint256 i=0; i < ids.length; i ++)
-
         {
             uint256 _id= ids[i];
             string memory _ipfshashes= ipfsHashes[i];
