@@ -11,11 +11,17 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract createAuctionContract is IERC721Receiver, Ownable {
 
     //Name of the marketplace 
-    string public name;
-    address public CubeContractAddress;
-    address public PaymentTokenContractAddress;
+     string public name;
+     address public CubeContractAddress;
+     address public PaymentTokenContractAddress;
     //Index of Auction
     uint256 public index =0;
+    //Struct for bids
+    struct Bid{
+        uint256 newbid;
+    }
+    //Mapping to check bid against address 
+    mapping (uint256=> mapping(address => Bid)) public bidByUser;
 
     //Structure to define auction properties 
     struct auction{
@@ -227,40 +233,41 @@ contract createAuctionContract is IERC721Receiver, Ownable {
             "Creator of the auction cannot place new bid"
         );
 
-        // get Weth ERC20 token contract
+        //get Weth ERC20 token contract
         IERC20 paymentToken = IERC20(PaymentTokenContractAddress);
 
-        // transfer token from new bider account to the marketplace account
-        // to lock the tokens
+        //transfer token from new bider account to the marketplace account
+        //to lock the tokens
         paymentToken.transferFrom(msg.sender, address(this), _newBid);
        
-        // new bid is valid so must refund the current bid owner (if there is one!)
-        if (Auction.bidCount > 0) {
+        //new bid is valid so must refund the current bid owner (if there is one!)
+        if (Auction.bidCount != 0) {
             paymentToken.transfer(
                 Auction.currentBidOwner,
                 Auction.currentBidPrice
             );
-             // update auction info
+        //update auction info
         address payable newBidOwner = payable(msg.sender);
         Auction.currentBidOwner = newBidOwner;
         Auction.currentBidPrice = _newBid;
         Auction.bidCount++;
 
-        // Trigger public event
+        //Trigger public event
         emit newBidonAuction(_auctionIndex, msg.sender, _newBid);
        
         }
       else{
-        // update auction info
+        //update auction info
         address payable newBidOwner = payable(msg.sender);
         Auction.currentBidOwner = newBidOwner;
         Auction.currentBidPrice = _newBid;
         Auction.bidCount++;
-
-        // Trigger public event
+        //Trigger public event
         emit newBidonAuction(_auctionIndex, msg.sender, _newBid);
-       
       }
+      //storing bid data
+       Bid storage bidbyuser= bidByUser[_auctionIndex][msg.sender];
+       bidbyuser.newbid= _newBid;
        return true;
     }
 
@@ -387,10 +394,19 @@ contract createAuctionContract is IERC721Receiver, Ownable {
         return this.onERC721Received.selector;
     }
 
+    //Function to replace the cube token contract address with the new address
     function setCubeContractAddress(address _newAddress) external onlyOwner{
         CubeContractAddress= _newAddress;
     }
+
+    //Function to replace the payment token contract address with the new address
     function setPaymentTokenContractAddress(address _newAddress) external onlyOwner{
         PaymentTokenContractAddress= _newAddress;
+    }
+    
+    //Function to get bid by bidder on the particular auction
+    function bidByUsers(uint256 _auctionIndex) public view returns(uint256){
+         Bid storage user= bidByUser[_auctionIndex][msg.sender];
+        return user.newbid;
     }
 }

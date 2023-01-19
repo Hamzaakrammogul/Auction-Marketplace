@@ -28,7 +28,7 @@ contract NFT is ERC1155, Ownable {
         for(uint256 y=0 ; y<ids.length; y++)
         {
             uint256 tokenId= _tokenIdCounter.current();
-           _tokenIdCounter.increment();
+            _tokenIdCounter.increment();
             ids[y] =ids[y] * 0 + tokenId;
         }
         mintBatch(ids, amounts, "");
