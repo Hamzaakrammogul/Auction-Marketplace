@@ -5,9 +5,10 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 
 //@author ameerhamzamogul
-contract Marketplace is ReentrancyGuard, Ownable {
+contract Marketplace is ReentrancyGuard, Ownable, Pausable {
 
     // Variables
     address payable public immutable feeAccount; // the account that receives fees
@@ -159,18 +160,18 @@ contract Marketplace is ReentrancyGuard, Ownable {
     {
         //Getting item from mapping by _tokenId
         Item storage item = items[_tokenId];
-        //get the total price for the item NFT price + fee 
-        uint256 _totalPrice = getTotalPrice(_tokenId);
-        //feePrice 
-        uint256 feeprice= _totalPrice-item.price;
+        // //get the total price for the item NFT price + fee 
+        // uint256 _totalPrice = getTotalPrice(_tokenId);
+        // //feePrice 
+        // uint256 feeprice= _totalPrice-item.price;
         //Check price if enough to buy the particular item 
-        require(_price >= _totalPrice, "not enough ether to cover item price and market fee");
+        require(_price >= item.price, "not enough weth to cover item price");
         //Check is items already sold
         require(!item.sold, "item already sold");
         //pay seller the price of the NFT
         _wethAddress.transferFrom(msg.sender,item.seller,_price);
         //pay feepercentage of marketplace to feeAccount
-        _wethAddress.transferFrom(msg.sender,feeAccount,feeprice);
+        //_wethAddress.transferFrom(msg.sender,feeAccount,feeprice);
         // update item to sold
         item.sold = true;
         // transfer nft to buyer
