@@ -4,11 +4,13 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+
 contract NFT is ERC1155, Ownable {
   using Counters for Counters.Counter;  
   string public name;
   string public symbol;
-
+ 
+  //uint to tokenURI
   mapping(uint => string) public tokenURI;
   Counters.Counter private _tokenIdCounter;
 
@@ -17,10 +19,12 @@ contract NFT is ERC1155, Ownable {
     symbol = "RD(NFT)";
   }
 
-  /**
-   * This function let user mint nfts
-   * And let user set URI for each and every NFT
-   */
+  // 
+  //This function let user mint nfts
+  //And let user set URI for each and every NFT
+  //@param count is the number of ids of NFTs user want to create
+  //@param amounts is array of the amount of NFTs per id
+  //@param ipfsHashes is array of ipfs hashes of each NFT
   function newBatch(uint256 count, uint256[] memory amounts, string[] memory ipfsHashes)
   external
   {    

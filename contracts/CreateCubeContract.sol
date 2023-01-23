@@ -17,6 +17,9 @@ contract CreateCubeContract is ERC721, ERC721Enumerable, ERC721URIStorage, Ownab
         auctionContractAddress= _auction;
     }
 
+    //This function will create Cube for the robotDrop 
+    //@param uri will be provided from the front end 
+    //When ever user create cube it will also call approve function on the auction contract 
     function createCube(string memory uri) external returns (uint256) {
        
         uint256 tokenId = _tokenIdCounter.current();

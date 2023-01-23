@@ -32,7 +32,7 @@ contract Marketplace is ReentrancyGuard, Ownable, Pausable {
         uint256 tokenId,
         address owner
     );
-
+    
     event Offered(
         uint256 itemId,
         address indexed nft,
