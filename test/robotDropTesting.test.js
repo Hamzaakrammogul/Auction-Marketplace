@@ -3,7 +3,7 @@ const { expect } = require("chai");
 const toWei = (num) => ethers.utils.parseEther(num.toString());
 const fromWei = (num) => ethers.utils.formatEther(num);
 
-let CreateNFTContract;
+let NFT;
 let CreateCubeContract;
 let cube;
 let WethContract;
@@ -16,48 +16,45 @@ let URI= "0x00";
 
 describe("Create NFT Contract", function(){
 
-  beforeEach("Deploy Function", async function(){
-    CreateNFTContract = await ethers.getContractFactory("CreateNFTContract");
+  beforeEach( async function(){
+    NFT = await ethers.getContractFactory("NFT");
     [deployer, addr1, addr2, ...addrs]= await ethers.getSigners();
-    NFT = await CreateNFTContract.deploy("Robot Drop NFT", "RD(NFT)");
-  });
-
-  describe("createBatch Testing", function(){
+    nftContract = await NFT.deploy("Robot Drop NFT", "RD(NFT)");
+  })
     let name = "Robot Drop NFT";
     let symbol= "RD(NFT)";
-  it("Check Name and Symbol", async function(){
 
-    let contractName= await NFT.name();
-    let contractSymbol= await NFT.symbol();
+  it("Check Name and Symbol", async function(){
+    let contractName= await nftContract.name();
+    let contractSymbol= await nftContract.symbol();
     expect(contractName).to.equal(name);
     expect(contractSymbol).to.equal(symbol);
   });
   
   it("Testing newBatch Fucntionality", async function(){
     //Minting from addr1
-    await NFT.connect(addr1).newBatch([0], [1], "0x00");
+    await nftContract.connect(addr1).newBatch(1, [1], "0x00");
     //Checking Balance of addr1
-    let bal= await NFT.balanceOf(addr1.address, 0);
+    let bal= await nftContract.balanceOf(addr1.address, 0);
     expect(bal).to.equal("1");
     //Minting from addr2
-    await NFT.connect(addr2).newBatch([0], [2], "0x00");
+    await nftContract.connect(addr2).newBatch(1, [2], "0x00");
     //Checking balance of addr2
-    let bal2= await NFT.balanceOf(addr2.address, 0);
+    let bal2= await nftContract.balanceOf(addr2.address, 1);
     expect(bal2).to.equal("2");
   });
 
   it("Testing batchMinting functionality", async function (){
     //Balance before Minting
-    let initialBal= await NFT.balanceOf(addr1.address, 0);
+    let initialBal= await nftContract.balanceOf(addr1.address, 0);
     expect(initialBal).to.equal(0);
     //Minting from addr1
-    await NFT.connect(addr1).batchMinting([0], [1], ["0x00"]);
+    await nftContract.connect(addr1).batchMinting(1, [1], ["0x00"]);
     //balance after Mintig
-    let finalBal = await NFT.balanceOf(addr1.address, 0);
+    let finalBal = await nftContract.balanceOf(addr1.address, 0);
     expect(finalBal).to.equal(1);
   })
   });
-});
 
 describe("Create Cube Contract", function () {
   beforeEach( async function(){
