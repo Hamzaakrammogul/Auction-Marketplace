@@ -12,7 +12,7 @@ async function main() {
     // const cube = await CreateCubeContract.deploy("0xE6f7A5CcB303909432Fa274F19bD5E671fAeaeE8");
 
     const Marketplace = await ethers.getContractFactory("Marketplace");
-    const market = await Marketplace.deploy(1);
+    const market = await Marketplace.deploy();
     console.log("Token address:", market.address);
   }
   
