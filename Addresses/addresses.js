@@ -2,4 +2,4 @@ const NFT= "0xeEed8dE33C654fA6b0D54125bF8C3a699E98E543";
 const createCubeContract= "0x2D6eDc8E035Bd1c9E9fD105B5c4ef4e4B716ea20";
 const auctionsContract= "0xc868825AFb75c228867fcFc93CcD2e8c08B7A80E";
 const wethContract= "0x9921CDd0d8819F22b4B53B1cb700cF0d7f8B7149";
-const marketplaceContract= "0x659c599d092BCBb262ed2E57C07743e3F2F53292";
+const marketplaceContract= "0xd072aa6C757F985BD42B9e6F692Fe38439720eAA";

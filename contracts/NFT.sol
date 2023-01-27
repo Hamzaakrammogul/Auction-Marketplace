@@ -25,7 +25,7 @@ contract NFT is ERC1155, Ownable {
   //@param count is the number of ids of NFTs user want to create
   //@param amounts is array of the amount of NFTs per id
   //@param ipfsHashes is array of ipfs hashes of each NFT
-  function Batch(uint256 count, uint256[] memory amounts, string[] memory ipfsHashes)
+  function newBatch(uint256 count, uint256[] memory amounts, string[] memory ipfsHashes)
   external
   {    
         uint256[] memory ids= new uint256 [](count);

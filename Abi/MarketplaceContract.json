@@ -1,11 +1,7 @@
 [
    {
       "inputs":[
-         {
-            "internalType":"uint256",
-            "name":"_feePercent",
-            "type":"uint256"
-         }
+         
       ],
       "stateMutability":"nonpayable",
       "type":"constructor"
@@ -129,6 +125,32 @@
       "type":"event"
    },
    {
+      "anonymous":false,
+      "inputs":[
+         {
+            "indexed":false,
+            "internalType":"address",
+            "name":"account",
+            "type":"address"
+         }
+      ],
+      "name":"Paused",
+      "type":"event"
+   },
+   {
+      "anonymous":false,
+      "inputs":[
+         {
+            "indexed":false,
+            "internalType":"address",
+            "name":"account",
+            "type":"address"
+         }
+      ],
+      "name":"Unpaused",
+      "type":"event"
+   },
+   {
       "inputs":[
          {
             "internalType":"contract IERC20",
@@ -205,55 +227,6 @@
    },
    {
       "inputs":[
-         
-      ],
-      "name":"feeAccount",
-      "outputs":[
-         {
-            "internalType":"address payable",
-            "name":"",
-            "type":"address"
-         }
-      ],
-      "stateMutability":"view",
-      "type":"function"
-   },
-   {
-      "inputs":[
-         
-      ],
-      "name":"feePercent",
-      "outputs":[
-         {
-            "internalType":"uint256",
-            "name":"",
-            "type":"uint256"
-         }
-      ],
-      "stateMutability":"view",
-      "type":"function"
-   },
-   {
-      "inputs":[
-         {
-            "internalType":"uint256",
-            "name":"_tokenId",
-            "type":"uint256"
-         }
-      ],
-      "name":"getTotalPrice",
-      "outputs":[
-         {
-            "internalType":"uint256",
-            "name":"",
-            "type":"uint256"
-         }
-      ],
-      "stateMutability":"view",
-      "type":"function"
-   },
-   {
-      "inputs":[
          {
             "internalType":"uint256",
             "name":"",
@@ -289,6 +262,11 @@
          },
          {
             "internalType":"bool",
+            "name":"onSale",
+            "type":"bool"
+         },
+         {
+            "internalType":"bool",
             "name":"sold",
             "type":"bool"
          },
@@ -318,17 +296,17 @@
    },
    {
       "inputs":[
-         {
-            "internalType":"uint256",
-            "name":"_tokenId",
-            "type":"uint256"
-         }
-      ],
-      "name":"purchaseItem",
-      "outputs":[
          
       ],
-      "stateMutability":"payable",
+      "name":"paused",
+      "outputs":[
+         {
+            "internalType":"bool",
+            "name":"",
+            "type":"bool"
+         }
+      ],
+      "stateMutability":"view",
       "type":"function"
    },
    {
